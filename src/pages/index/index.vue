@@ -41,10 +41,13 @@ const isTriggered = ref(false)
 // 自定义下拉刷新被触发
 const onrefresherrefresh = async() => {
   isTriggered.value = true
+  guessRef.value?.resetData() 
   // await getHomeBannerData()
   // await getHomeCategoryData()
   // await getHomeHotData()
-  await Promise.all([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()]) // 关闭动画
+  await Promise.all([getHomeBannerData(), getHomeCategoryData(), getHomeHotData(),
+  guessRef.value?.getMore()
+  ]) // 关闭动画
   isTriggered.value = false
 }
 </script>
