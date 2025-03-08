@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home.d'
-import {getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI} from '@/services/home';
-import {ref} from 'vue'
+import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home';
+import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import CustomNavbar from './components/CustomNavbar.vue'
 import CategoryPanel from './components/CategoryPanel.vue';
@@ -26,38 +26,50 @@ const getHomeHotData = async () => {
   hotList.value = res.result
 }
 
-onLoad(() => { 
-    getHomeBannerData()
-    getHomeCategoryData()
-    getHomeHotData()
+onLoad(() => {
+  getHomeBannerData()
+  getHomeCategoryData()
+  getHomeHotData()
 })
 
 const guessRef = ref<XtxGuessInstance>()
 const onScrollToLower = () => {
   guessRef.value?.getMore()
 }
+const isTriggered = ref(false)
 
+// 自定义下拉刷新被触发
+const onrefresherrefresh = async() => {
+  isTriggered.value = true
+  // await getHomeBannerData()
+  // await getHomeCategoryData()
+  // await getHomeHotData()
+  await Promise.all([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()]) // 关闭动画
+  isTriggered.value = false
+}
 </script>
 
 <template>
-    <CustomNavbar />
-    <scroll-view  @scrolltolower="onScrollToLower " class="scroll-view" scroll-y>
-      <XtxSwiper  :list="bannerList"/>
+  <CustomNavbar />
+  <scroll-view refresher-enabled @refresherrefresh="onrefresherrefresh" :refresher-triggered="isTriggered"
+    @scrolltolower="onScrollToLower" class="scroll-view" scroll-y>
+    <XtxSwiper :list="bannerList" />
     <CategoryPanel :list="categoryList" />
-    <HotPanel  :list="hotList" />
+    <HotPanel :list="hotList" />
     <XtxGuess ref="guessRef" />
-    </scroll-view>
-    
+  </scroll-view>
+
 </template>
 
 <style lang="scss">
-page{
+page {
   background-color: #F7F7F7;
   height: 100%;
   display: flex;
   flex-direction: column;
 }
-.scroll-view{
+
+.scroll-view {
   flex: 1;
 }
 </style>
