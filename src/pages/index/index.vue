@@ -6,8 +6,8 @@ import { onLoad } from '@dcloudio/uni-app'
 import CustomNavbar from './components/CustomNavbar.vue'
 import CategoryPanel from './components/CategoryPanel.vue';
 import HotPanel from './components/HotPanel.vue';
+import PageSkeleton from './components/PageSkeleton.vue';
 import type { XtxGuessInstance } from '@/types/component';
-
 const bannerList = ref<BannerItem[]>([])
 const getHomeBannerData = async () => {
   const res = await getHomeBannerAPI()
@@ -26,10 +26,17 @@ const getHomeHotData = async () => {
   hotList.value = res.result
 }
 
-onLoad(() => {
-  getHomeBannerData()
-  getHomeCategoryData()
-  getHomeHotData()
+const isLoading = ref(false)
+
+onLoad(async () => {
+  isLoading.value = true
+  await Promise.all([
+    getHomeBannerData(),
+    getHomeCategoryData(),
+    getHomeHotData()
+  ])
+
+  isLoading.value = false
 })
 
 const guessRef = ref<XtxGuessInstance>()
@@ -39,9 +46,9 @@ const onScrollToLower = () => {
 const isTriggered = ref(false)
 
 // 自定义下拉刷新被触发
-const onrefresherrefresh = async() => {
+const onrefresherrefresh = async () => {
   isTriggered.value = true
-  guessRef.value?.resetData() 
+  guessRef.value?.resetData()
   // await getHomeBannerData()
   // await getHomeCategoryData()
   // await getHomeHotData()
@@ -56,10 +63,14 @@ const onrefresherrefresh = async() => {
   <CustomNavbar />
   <scroll-view refresher-enabled @refresherrefresh="onrefresherrefresh" :refresher-triggered="isTriggered"
     @scrolltolower="onScrollToLower" class="scroll-view" scroll-y>
-    <XtxSwiper :list="bannerList" />
-    <CategoryPanel :list="categoryList" />
-    <HotPanel :list="hotList" />
-    <XtxGuess ref="guessRef" />
+    <PageSkeleton v-if="isLoading" />
+    <template v-else>
+      <XtxSwiper :list="bannerList" />
+      <CategoryPanel :list="categoryList" />
+      <HotPanel :list="hotList" />
+      <XtxGuess ref="guessRef" />
+    </template>
+
   </scroll-view>
 
 </template>
