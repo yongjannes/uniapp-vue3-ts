@@ -7,7 +7,9 @@ import CustomNavbar from './components/CustomNavbar.vue'
 import CategoryPanel from './components/CategoryPanel.vue';
 import HotPanel from './components/HotPanel.vue';
 import PageSkeleton from './components/PageSkeleton.vue';
-import type { XtxGuessInstance } from '@/types/component';
+import { useGuessList } from '@/composables';
+
+
 const bannerList = ref<BannerItem[]>([])
 const getHomeBannerData = async () => {
   const res = await getHomeBannerAPI()
@@ -39,10 +41,8 @@ onLoad(async () => {
   isLoading.value = false
 })
 
-const guessRef = ref<XtxGuessInstance>()
-const onScrollToLower = () => {
-  guessRef.value?.getMore()
-}
+const { guessRef, onScrolltolower } = useGuessList()
+
 const isTriggered = ref(false)
 
 // 自定义下拉刷新被触发
@@ -62,7 +62,7 @@ const onrefresherrefresh = async () => {
 <template>
   <CustomNavbar />
   <scroll-view refresher-enabled @refresherrefresh="onrefresherrefresh" :refresher-triggered="isTriggered"
-    @scrolltolower="onScrollToLower" class="scroll-view" scroll-y>
+    @scrolltolower="onScrolltolower" class="scroll-view" scroll-y>
     <PageSkeleton v-if="isLoading" />
     <template v-else>
       <XtxSwiper :list="bannerList" />
