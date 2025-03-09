@@ -5,6 +5,7 @@ import { onLoad } from '@dcloudio/uni-app';
 import { ref } from 'vue';
 import AddressPanel from './components/AddressPanel.vue'
 import ServicePanel from './components/ServicePanel.vue'
+import PageSkeleton from './components/PageSkeleton.vue';
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -22,10 +23,13 @@ const getGoodsByIdData = async () => {
   goods.value = res.result
 }
 
-// 页面加载
-onLoad(() => {
-  getGoodsByIdData()
+const isFinish=ref(false)
+
+onLoad(async () => {
+  await getGoodsByIdData()
+  isFinish.value=true
 })
+
 
 // 轮播图变化时
 const currentIndex = ref(0)
@@ -60,7 +64,7 @@ const openPopup = (name: typeof popupName.value) => {
 </script>
 
 <template>
-  <scroll-view scroll-y class="viewport">
+  <scroll-view scroll-y class="viewport" v-if="isFinish">
     <!-- 基本信息 -->
     <view class="goods">
       <!-- 商品主图 -->
@@ -140,7 +144,10 @@ const openPopup = (name: typeof popupName.value) => {
         </navigator>
       </view>
     </view>
+
+    
   </scroll-view>
+  <PageSkeleton v-else />
 
   <!-- 用户操作 -->
   <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
@@ -164,6 +171,8 @@ const openPopup = (name: typeof popupName.value) => {
     <AddressPanel v-if="popupName === 'address'" @close="popup?.close()" />
     <ServicePanel v-if="popupName === 'service'" @close="popup?.close()" />
   </uni-popup>
+
+
 </template>
 
 <style lang="scss">
