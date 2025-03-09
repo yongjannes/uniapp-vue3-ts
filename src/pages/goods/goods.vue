@@ -3,6 +3,8 @@ import { getGoodsByIdAPI } from '@/services/goods';
 import type { GoodsResult } from '@/types/goods';
 import { onLoad } from '@dcloudio/uni-app';
 import { ref } from 'vue';
+import AddressPanel from './components/AddressPanel.vue'
+import ServicePanel from './components/ServicePanel.vue'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -39,24 +41,40 @@ const onTapImage = (url: string) => {
     urls: goods.value!.mainPictures,
   })
 }
+
+// uni-ui 弹出层组件 ref
+const popup = ref<{
+  open: (type?: UniHelper.UniPopupType) => void
+  close: () => void
+}>()
+
+// 弹出层条件渲染
+const popupName = ref<'address' | 'service'>()
+const openPopup = (name: typeof popupName.value) => {
+  // 修改弹出层名称
+  popupName.value = name
+  // 打开弹出层
+  popup.value?.open()
+}
+
 </script>
 
 <template>
-  <scroll-view scroll-y class="viewport" >
+  <scroll-view scroll-y class="viewport">
     <!-- 基本信息 -->
     <view class="goods">
       <!-- 商品主图 -->
       <view class="preview">
-    <swiper @change="onChange" circular>
-      <swiper-item v-for="item in goods?.mainPictures" :key="item">
-        <image @tap="onTapImage(item)" mode="aspectFill" :src="item" />
-      </swiper-item>
-    </swiper>
-    <view class="indicator">
-      <text class="current">{{ currentIndex + 1 }}</text>
-      <text class="split">/</text>
-      <text class="total">{{ goods?.mainPictures.length }}</text>
-    </view>
+        <swiper @change="onChange" circular>
+          <swiper-item v-for="item in goods?.mainPictures" :key="item">
+            <image @tap="onTapImage(item)" mode="aspectFill" :src="item" />
+          </swiper-item>
+        </swiper>
+        <view class="indicator">
+          <text class="current">{{ currentIndex + 1 }}</text>
+          <text class="split">/</text>
+          <text class="total">{{ goods?.mainPictures.length }}</text>
+        </view>
       </view>
 
       <!-- 商品简介 -->
@@ -65,8 +83,8 @@ const onTapImage = (url: string) => {
           <text class="symbol">¥</text>
           <text class="number">{{ goods?.price }}</text>
         </view>
-        <view class="name ellipsis">{{goods?.name}} </view>
-        <view class="desc"> {{goods?.desc}} </view>
+        <view class="name ellipsis">{{ goods?.name }} </view>
+        <view class="desc"> {{ goods?.desc }} </view>
       </view>
 
       <!-- 操作面板 -->
@@ -75,11 +93,11 @@ const onTapImage = (url: string) => {
           <text class="label">选择</text>
           <text class="text ellipsis"> 请选择商品规格 </text>
         </view>
-        <view class="item arrow">
+        <view @tap="openPopup('address')" class="item arrow">
           <text class="label">送至</text>
           <text class="text ellipsis"> 请选择收获地址 </text>
         </view>
-        <view class="item arrow">
+        <view @tap="openPopup('service')" class="item arrow">
           <text class="label">服务</text>
           <text class="text ellipsis"> 无忧退 快速退款 免费包邮 </text>
         </view>
@@ -95,17 +113,13 @@ const onTapImage = (url: string) => {
         <view class="properties">
           <!-- 属性详情 -->
           <view class="item" v-for="item in goods?.details.properties" :key="item.name">
-            <text class="label">{{item.name}}</text>
-            <text class="value">{{item.value}}</text>
+            <text class="label">{{ item.name }}</text>
+            <text class="value">{{ item.value }}</text>
           </view>
-          
+
         </view>
         <!-- 图片详情 -->
-        <image
-        v-for="item in goods?.details.pictures" :key="item"
-          mode="widthFix"
-          :src="item"
-        ></image>
+        <image v-for="item in goods?.details.pictures" :key="item" mode="widthFix" :src="item"></image>
       </view>
     </view>
 
@@ -115,22 +129,13 @@ const onTapImage = (url: string) => {
         <text>同类推荐</text>
       </view>
       <view class="content">
-        <navigator
-          v-for="item in goods?.similarProducts"
-          :key="item.id"
-          class="goods"
-          hover-class="none"
-          :url="`/pages/goods/goods?id=${item.id}`"
-        >
-          <image
-            class="image"
-            mode="aspectFill"
-            :src="item.picture"
-          ></image>
-          <view class="name ellipsis">{{item.name}}</view>
+        <navigator v-for="item in goods?.similarProducts" :key="item.id" class="goods" hover-class="none"
+          :url="`/pages/goods/goods?id=${item.id}`">
+          <image class="image" mode="aspectFill" :src="item.picture"></image>
+          <view class="name ellipsis">{{ item.name }}</view>
           <view class="price">
             <text class="symbol">¥</text>
-            <text class="number">{{item.price}}</text>
+            <text class="number">{{ item.price }}</text>
           </view>
         </navigator>
       </view>
@@ -153,6 +158,12 @@ const onTapImage = (url: string) => {
       <view class="buynow"> 立即购买 </view>
     </view>
   </view>
+
+  <!-- uni-ui 弹出层 -->
+  <uni-popup ref="popup" type="bottom" background-color="#fff">
+    <AddressPanel v-if="popupName === 'address'" @close="popup?.close()" />
+    <ServicePanel v-if="popupName === 'service'" @close="popup?.close()" />
+  </uni-popup>
 </template>
 
 <style lang="scss">
@@ -170,6 +181,7 @@ page {
 .panel {
   margin-top: 20rpx;
   background-color: #fff;
+
   .title {
     display: flex;
     justify-content: space-between;
@@ -178,6 +190,7 @@ page {
     line-height: 1;
     padding: 30rpx 60rpx 30rpx 6rpx;
     position: relative;
+
     text {
       padding-left: 10rpx;
       font-size: 28rpx;
@@ -185,6 +198,7 @@ page {
       font-weight: 600;
       border-left: 4rpx solid #27ba9b;
     }
+
     navigator {
       font-size: 24rpx;
       color: #666;
@@ -208,13 +222,16 @@ page {
 /* 商品信息 */
 .goods {
   background-color: #fff;
+
   .preview {
     height: 750rpx;
     position: relative;
+
     .image {
       width: 750rpx;
       height: 750rpx;
     }
+
     .indicator {
       height: 40rpx;
       padding: 0 24rpx;
@@ -226,21 +243,26 @@ page {
       position: absolute;
       bottom: 30rpx;
       right: 30rpx;
+
       .current {
         font-size: 26rpx;
       }
+
       .split {
         font-size: 24rpx;
         margin: 0 1rpx 0 2rpx;
       }
+
       .total {
         font-size: 24rpx;
       }
     }
   }
+
   .meta {
     position: relative;
     border-bottom: 1rpx solid #eaeaea;
+
     .price {
       height: 130rpx;
       padding: 25rpx 30rpx 0;
@@ -249,9 +271,11 @@ page {
       box-sizing: border-box;
       background-color: #35c8a9;
     }
+
     .number {
       font-size: 56rpx;
     }
+
     .brand {
       width: 160rpx;
       height: 80rpx;
@@ -260,6 +284,7 @@ page {
       top: 26rpx;
       right: 30rpx;
     }
+
     .name {
       max-height: 88rpx;
       line-height: 1.4;
@@ -267,6 +292,7 @@ page {
       font-size: 32rpx;
       color: #333;
     }
+
     .desc {
       line-height: 1;
       padding: 0 20rpx 30rpx;
@@ -274,8 +300,10 @@ page {
       color: #cf4444;
     }
   }
+
   .action {
     padding-left: 20rpx;
+
     .item {
       height: 90rpx;
       padding-right: 60rpx;
@@ -285,15 +313,18 @@ page {
       position: relative;
       display: flex;
       align-items: center;
+
       &:last-child {
         border-bottom: 0 none;
       }
     }
+
     .label {
       width: 60rpx;
       color: #898b94;
       margin: 0 16rpx 0 10rpx;
     }
+
     .text {
       flex: 1;
       -webkit-line-clamp: 1;
@@ -304,15 +335,19 @@ page {
 /* 商品详情 */
 .detail {
   padding-left: 20rpx;
+
   .content {
     margin-left: -20rpx;
+
     .image {
       width: 100%;
     }
   }
+
   .properties {
     padding: 0 20rpx;
     margin-bottom: 30rpx;
+
     .item {
       display: flex;
       line-height: 2;
@@ -321,9 +356,11 @@ page {
       color: #333;
       border-bottom: 1rpx dashed #ccc;
     }
+
     .label {
       width: 200rpx;
     }
+
     .value {
       flex: 1;
     }
@@ -337,6 +374,7 @@ page {
     background-color: #f4f4f4;
     display: flex;
     flex-wrap: wrap;
+
     .goods {
       width: 340rpx;
       padding: 24rpx 20rpx 20rpx;
@@ -344,26 +382,31 @@ page {
       border-radius: 10rpx;
       background-color: #fff;
     }
+
     .image {
       width: 300rpx;
       height: 260rpx;
     }
+
     .name {
       height: 80rpx;
       margin: 10rpx 0;
       font-size: 26rpx;
       color: #262626;
     }
+
     .price {
       line-height: 1;
       font-size: 20rpx;
       color: #cf4444;
     }
+
     .number {
       font-size: 26rpx;
       margin-left: 2rpx;
     }
   }
+
   navigator {
     &:nth-child(even) {
       margin-right: 0;
@@ -386,9 +429,11 @@ page {
   justify-content: space-between;
   align-items: center;
   box-sizing: content-box;
+
   .buttons {
     display: flex;
-    & > view {
+
+    &>view {
       width: 220rpx;
       text-align: center;
       line-height: 72rpx;
@@ -396,20 +441,24 @@ page {
       color: #fff;
       border-radius: 72rpx;
     }
+
     .addcart {
       background-color: #ffa868;
     }
+
     .buynow,
     .payment {
       background-color: #27ba9b;
       margin-left: 20rpx;
     }
   }
+
   .icons {
     padding-right: 10rpx;
     display: flex;
     align-items: center;
     flex: 1;
+
     .icons-button {
       flex: 1;
       text-align: center;
@@ -420,10 +469,12 @@ page {
       font-size: 20rpx;
       color: #333;
       background-color: #fff;
+
       &::after {
         border: none;
       }
     }
+
     text {
       display: block;
       font-size: 34rpx;
