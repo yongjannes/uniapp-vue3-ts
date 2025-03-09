@@ -23,7 +23,6 @@ const getHomeGoodsGuessLikeData =   async ()  => {
     const res=await getHomeGoodsGuessLikeAPI(pageParams)
     // guessList.value = res.result.items;
     guessList.value.push(...res.result.items)
-
      // 分页条件
   if (pageParams.page < res.result.pages) {
     // 页码累加
@@ -59,7 +58,7 @@ defineExpose({
       class="guess-item"
       v-for="item in guessList"
       :key="item.id"
-      :url="`/pages/goods/goods?id=4007498`"
+      :url="`/pages/goods/goods?id=${item.id}`"
     >
       <image
         class="image"
