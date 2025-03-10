@@ -20,6 +20,8 @@ onLoad(() => {
   getMemberProfileData()
 })
 
+// 获取 Store 头像
+const memberStore = useMemberStore()
 
 // 修改头像
 const onAvatarChange = () => {
@@ -44,6 +46,8 @@ const onAvatarChange = () => {
             const { avatar } = JSON.parse(res.data).result
             // 当前页面更新头像
             profile.value!.avatar = avatar 
+              // 更新 Store 头像
+            memberStore.profile!.avatar = avatar
             uni.showToast({ icon: 'success', title: '更新成功' })
           } else {
             uni.showToast({ icon: 'error', title: '出现错误' })
@@ -54,11 +58,18 @@ const onAvatarChange = () => {
   })
 }
 
+
+
+
 const onSubmit=async()=>{
   const res = await putMemberProfileAPI({
     nickname: profile.value.nickname,
   })
+  memberStore.profile!.nickname = res.result.nickname
   uni.showToast({ icon: 'success', title: '保存成功' })
+  setTimeout(() => {
+    uni.navigateBack()
+  }, 400)
 }
 </script>
 
