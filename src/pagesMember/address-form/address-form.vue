@@ -39,6 +39,7 @@ uni.setNavigationBarTitle({ title: query.id ? '修改地址' : '新建地址' })
 
 
 // 收集所在地区
+// #ifdef MP-WEIXIN
 const onRegionChange: UniHelper.RegionPickerOnChange = (ev) => {
   // 省市区(前端展示)
   form.value.fullLocation = ev.detail.value.join(' ')
@@ -47,6 +48,21 @@ const onRegionChange: UniHelper.RegionPickerOnChange = (ev) => {
   // 合并数据
   Object.assign(form.value, { provinceCode, cityCode, countyCode })
 }
+// #endif
+
+
+// #ifdef H5 || APP-PLUS
+const onCityChange: UniHelper.UniDataPickerOnChange = (ev) => {
+  // 省市区
+  const [province, city, county] = ev.detail.value
+  // 收集后端所需的 code 数据
+  Object.assign(form.value, {
+    provinceCode: province.value,
+    cityCode: city.value,
+    countyCode: county.value,
+  })
+}
+// #endif
 
 // 收集是否默认收货地址
 const onSwitchChange: UniHelper.SwitchOnChange = (ev) => {
@@ -65,7 +81,7 @@ const rules: UniHelper.UniFormsRules = {
       { pattern: /^1[3-9]\d{9}$/, errorMessage: '手机号格式不正确' },
     ],
   },
-  fullLocation: {
+  countyCode: {
     rules: [{ required: true, errorMessage: '请选择所在地区' }],
   },
   address: {
@@ -100,18 +116,7 @@ const onSubmit = async () => {
   }
 }
 
-// #ifdef H5 || APP-PLUS
-const onCityChange: UniHelper.UniDataPickerOnChange = (ev) => {
-  // 省市区
-  const [province, city, county] = ev.detail.value
-  // 收集后端所需的 code 数据
-  Object.assign(form.value, {
-    provinceCode: province.value,
-    cityCode: city.value,
-    countyCode: county.value,
-  })
-}
-// #endif
+
 </script>
 
 <template>
@@ -127,7 +132,7 @@ const onCityChange: UniHelper.UniDataPickerOnChange = (ev) => {
         <input class="input" placeholder="请填写收货人手机号码" v-model="form.contact" />
       </uni-forms-item>
       
-      <uni-forms-item name="fullLocation" class="form-item">
+      <uni-forms-item name="countyCode" class="form-item">
         <text class="label">所在地区</text>
         <!-- #ifdef MP-WEIXIN -->
         <picker @change="onRegionChange" class="picker" mode="region"  :value="form.fullLocation.split(' ')">
@@ -167,6 +172,13 @@ const onCityChange: UniHelper.UniDataPickerOnChange = (ev) => {
 </template>
 
 <style lang="scss">
+/* #ifdef H5  || APP-PLUS */
+:deep(.selected-area)
+{
+  height: auto;
+  flex: 0 1 auto;
+}
+/* #endif */
 page {
   background-color: #f4f4f4;
 }
