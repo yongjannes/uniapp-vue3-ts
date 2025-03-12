@@ -2,4 +2,5 @@ node_modules/
 dist/
 .DS_Store
 *.log
-@/uni_modules/
+src/uni_modules/
+uniCloud-aliyun/
