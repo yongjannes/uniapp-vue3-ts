@@ -110,7 +110,7 @@
 </template>
  
 <style lang="scss">
-/* #ifdef H5 */
+/* #ifdef H5 || APP-PLUS */
 @import '@/components/styles/XtxSwiper.scss';
 @import './styles/CategoryPanel.scss';
 @import "./styles/HotPanel.scss";

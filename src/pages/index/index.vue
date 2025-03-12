@@ -76,6 +76,9 @@ const onrefresherrefresh = async () => {
 </template>
 
 <style lang="scss">
+/* #ifdef APP-PLUS */
+#app,
+/* #endif */
 page {
   background-color: #F7F7F7;
   height: 100%;
