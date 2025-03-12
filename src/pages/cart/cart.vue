@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useGuessList } from '@/composables';
 import { getMemberCartAPI } from '@/services/cart';
 import { useMemberStore } from '@/stores';
 import type { CartItem } from '@/types/cart';
@@ -22,10 +23,13 @@ onShow(() => {
     getMemberCartData()
   }
 })
+
+// 猜你喜欢组合式函数
+const { guessRef, onScrolltolower } = useGuessList()
 </script>
 
 <template>
-  <scroll-view scroll-y class="scroll-view">
+  <scroll-view scroll-y class="scroll-view" @scrolltolower="onScrolltolower">
     <!-- 已登录: 显示购物车 -->
     <template v-if="memberStore.profile">
       <!-- 购物车列表 -->
