@@ -108,8 +108,15 @@
         </view>
     </view>
 </template>
+ 
+<style lang="scss">
+/* #ifdef H5 */
+@import '@/components/styles/XtxSwiper.scss';
+@import './styles/CategoryPanel.scss';
+@import "./styles/HotPanel.scss";
+/* #endif */
+// H5端默认开启了scoped，导致组件基础样式无效
 
-<style>
 .sk-transparent {
     color: transparent !important;
 }
