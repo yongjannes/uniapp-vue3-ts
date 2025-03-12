@@ -4,6 +4,8 @@ import { useMemberStore } from '@/stores'
 import type { LoginResult } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 
+
+// #ifdef MP-WEIXIN
 // 获取 code 登录凭证
 let code = ''
 onLoad(async () => {
@@ -12,7 +14,7 @@ onLoad(async () => {
 })
 
 // 获取用户手机号码（企业中写法）
-const onGetphonenumber: UniHelper.ButtonOnGetphonenumber  = async (ev) => {
+const onGetphonenumber: UniHelper.ButtonOnGetphonenumber = async (ev) => {
   // 获取参数
   const encryptedData = ev.detail.encryptedData!
   const iv = ev.detail.iv!
@@ -20,6 +22,8 @@ const onGetphonenumber: UniHelper.ButtonOnGetphonenumber  = async (ev) => {
   const res = await postLoginWxMinAPI({ code, encryptedData, iv })
   loginSuccess(res.result)
 }
+// #endif
+
 
 // 模拟手机号码快捷登录（开发练习）
 const onGetphonenumberSimple = async () => {
@@ -45,22 +49,25 @@ const loginSuccess = (profile: LoginResult) => {
 <template>
   <view class="viewport">
     <view class="logo">
-      <image
-        src="https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/logo_icon.png"
-      ></image>
+      <image src="https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/logo_icon.png"></image>
     </view>
     <view class="login">
       <!-- 网页端表单登录 -->
-      <!-- <input class="input" type="text" placeholder="请输入用户名/手机号码" /> -->
-      <!-- <input class="input" type="text" password placeholder="请输入密码" /> -->
-      <!-- <button class="button phone">登录</button> -->
+       <!-- #ifdef H5 -->
+       <input class="input" type="text" placeholder="请输入用户名/手机号码" />
+      <input class="input" type="text" password placeholder="请输入密码" />
+      <button class="button phone">登录</button>
+       <!-- #endif -->
+
 
       <!-- 小程序端授权登录 -->
-       
+      <!-- #ifdef MP-WEIXIN -->
       <button class="button phone" open-type="getPhoneNumber" @getphonenumber="onGetphonenumber">
         <text class="icon icon-phone"></text>
         手机号快捷登录
       </button>
+      <!-- #endif -->
+
       <view class="extra">
         <view class="caption">
           <text>其他登录方式</text>
@@ -68,7 +75,7 @@ const loginSuccess = (profile: LoginResult) => {
         <view class="options">
           <!-- 通用模拟登录 -->
           <button @tap="onGetphonenumberSimple">
-            <text class="icon icon-phone" >模拟快捷登录</text>
+            <text class="icon icon-phone">模拟快捷登录</text>
           </button>
         </view>
       </view>
@@ -92,6 +99,7 @@ page {
 .logo {
   flex: 1;
   text-align: center;
+
   image {
     width: 220rpx;
     height: 220rpx;
@@ -124,6 +132,7 @@ page {
     font-size: 28rpx;
     border-radius: 72rpx;
     color: #fff;
+
     .icon {
       font-size: 40rpx;
       margin-right: 6rpx;
@@ -141,6 +150,7 @@ page {
   .extra {
     flex: 1;
     padding: 70rpx 70rpx 0;
+
     .caption {
       width: 440rpx;
       line-height: 1;
@@ -148,6 +158,7 @@ page {
       font-size: 26rpx;
       color: #999;
       position: relative;
+
       text {
         transform: translate(-40%);
         background-color: #fff;
@@ -162,6 +173,7 @@ page {
       justify-content: center;
       align-items: center;
       margin-top: 70rpx;
+
       button {
         padding: 0;
         background-color: transparent;
@@ -187,6 +199,7 @@ page {
         border-radius: 50%;
       }
     }
+
     .icon-weixin::before {
       border-color: #06c05f;
       color: #06c05f;
