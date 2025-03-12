@@ -79,13 +79,19 @@ const getMemberOrderByIdData = async () => {
 onLoad(() => {
   getMemberOrderByIdData()
 })
+
+// 倒计时结束事件
+const onTimeup = () => {
+  // 修改订单状态为已取消
+  order.value!.orderState = OrderState.YiQuXiao
+}
 </script>
 
 <template>
   <!-- 自定义导航栏: 默认透明不可见, scroll-view 滚动到 50 时展示 -->
   <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
     <view class="wrap">
-      <navigator v-if="pages.length>1" open-type="navigateBack" class="back icon-left"></navigator>
+      <navigator v-if="pages.length > 1" open-type="navigateBack" class="back icon-left"></navigator>
       <navigator v-else url="/pages/index/index" open-type="switchTab" class="back icon-home">
       </navigator>
       <view class="title">订单详情</view>
@@ -96,12 +102,14 @@ onLoad(() => {
       <!-- 订单状态 -->
       <view class="overview" :style="{ paddingTop: safeAreaInsets!.top + 20 + 'px' }">
         <!-- 待付款状态:展示去支付按钮和倒计时 -->
-        <template v-if="order?.orderState===OrderState.DaiFuKuan">
+        <template v-if="order?.orderState === OrderState.DaiFuKuan">
           <view class="status icon-clock">等待付款</view>
           <view class="tips">
             <text class="money">应付金额: ¥ 99.00</text>
             <text class="time">支付剩余</text>
-            00 时 29 分 59 秒
+            <!-- 倒计时组件 -->
+            <uni-countdown :second="order.countdown" color="#fff" splitor-color="#fff" :show-day="false"
+              :show-colon="false" @timeup="onTimeup" />
           </view>
           <view class="button">去支付</view>
         </template>
@@ -110,11 +118,7 @@ onLoad(() => {
           <!-- 订单状态文字 -->
           <view class="status"> {{ orderStateList[order.orderState].text }} </view>
           <view class="button-group">
-            <navigator
-              class="button"
-              :url="`/pagesOrder/create/create?orderId=${query.id}`"
-              hover-class="none"
-            >
+            <navigator class="button" :url="`/pagesOrder/create/create?orderId=${query.id}`" hover-class="none">
               再次购买
             </navigator>
             <!-- 待发货状态：模拟发货,开发期间使用,用于修改订单状态为已发货 -->
@@ -141,17 +145,9 @@ onLoad(() => {
       <!-- 商品信息 -->
       <view class="goods">
         <view class="item">
-          <navigator
-            class="navigator"
-            v-for="item in 2"
-            :key="item"
-            :url="`/pages/goods/goods?id=${item}`"
-            hover-class="none"
-          >
-            <image
-              class="cover"
-              src="https://yanxuan-item.nosdn.127.net/c07edde1047fa1bd0b795bed136c2bb2.jpg"
-            ></image>
+          <navigator class="navigator" v-for="item in 2" :key="item" :url="`/pages/goods/goods?id=${item}`"
+            hover-class="none">
+            <image class="cover" src="https://yanxuan-item.nosdn.127.net/c07edde1047fa1bd0b795bed136c2bb2.jpg"></image>
             <view class="meta">
               <view class="name ellipsis">ins风小碎花泡泡袖衬110-160cm</view>
               <view class="type">藏青小花， 130</view>
@@ -211,11 +207,7 @@ onLoad(() => {
         </template>
         <!-- 其他订单状态:按需展示按钮 -->
         <template v-else>
-          <navigator
-            class="button secondary"
-            :url="`/pagesOrder/create/create?orderId=${query.id}`"
-            hover-class="none"
-          >
+          <navigator class="button secondary" :url="`/pagesOrder/create/create?orderId=${query.id}`" hover-class="none">
             再次购买
           </navigator>
           <!-- 待收货状态: 展示确认收货 -->
