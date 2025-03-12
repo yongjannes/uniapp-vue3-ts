@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
 import { OrderState, orderStateList } from '@/services/constants'
-import { deleteMemberOrderAPI, getMemberOrderByIdAPI, getMemberOrderConsignmentByIdAPI, getMemberOrderLogisticsByIdAPI, putMemberOrderReceiptByIdAPI } from '@/services/order'
+import { deleteMemberOrderAPI, getMemberOrderByIdAPI, getMemberOrderCancelByIdAPI, getMemberOrderConsignmentByIdAPI, getMemberOrderLogisticsByIdAPI, putMemberOrderReceiptByIdAPI } from '@/services/order'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import type { LogisticItem, OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
@@ -156,6 +156,18 @@ const onOrderDelete = () => {
       }
     },
   })
+}
+
+// 取消订单
+const onOrderCancel = async () => {
+  // 发送请求
+  const res = await getMemberOrderCancelByIdAPI(query.id, { cancelReason: reason.value })
+  // 更新订单信息
+  order.value = res.result
+  // 关闭弹窗
+  popup.value?.close!()
+  // 轻提示
+  uni.showToast({ icon: 'none', title: '订单取消成功' })
 }
 
 </script>
@@ -314,7 +326,8 @@ const onOrderDelete = () => {
       </view>
       <view class="footer">
         <view class="button" @tap="popup?.close?.()">取消</view>
-        <view class="button primary">确认</view>
+        <view class="button primary" @tap="onOrderCancel">确认</view>
+
       </view>
     </view>
   </uni-popup>
